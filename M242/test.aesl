@@ -1,0 +1,59 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="32998" name="thymio-II">#motor.left.target = 200
+#motor.right.target = 200
+var time = 0
+var i = 0
+timer.period[0] = 1000
+
+
+
+onevent timer0
+	if time == 0 then
+		motor.left.target = 200
+		motor.right.target = -200
+		timer.period[0] = 1170
+		time = 1
+	else
+		motor.left.target = 0
+		motor.right.target = 0
+		timer.period[0] = 1170
+		time = 0
+	end
+  		
+
+
+onevent prox
+	if prox.horizontal[2]> 100 then
+		#motor.left.target = 200
+		#motor.right.target = -200
+	end
+	
+	if prox.horizontal[2]&lt; 100 then
+		#motor.left.target = 200
+		#motor.right.target = 200
+	end
+	
+	if prox.ground.ambiant[0] &lt; 1 then
+		motor.left.target = 0
+		motor.right.target = 0
+	end
+
+
+	</node>
+
+
+</network>
