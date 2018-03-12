@@ -1,0 +1,140 @@
+<!DOCTYPE aesl-source>
+<network>
+
+
+<!--list of global events-->
+
+
+<!--list of constants-->
+
+
+<!--show keywords state-->
+<keywords flag="true"/>
+
+
+<!--node thymio-II-->
+<node nodeId="32998" name="thymio-II">var left = 0
+var right = 0
+var exitcorrect = 0
+
+sub moveforward
+	motor.left.target = 200
+	motor.right.target = 200
+
+sub stop
+	motor.left.target = 0
+	motor.right.target = 0
+
+sub turnleft
+	motor.left.target = -200
+	motor.right.target = 200
+
+sub turnright
+	motor.left.target = 200
+	motor.right.target = -200
+	
+sub correctleft
+	motor.left.target = 150
+	motor.right.target = 200
+
+sub correctright
+	motor.left.target = 200
+	motor.right.target = 150
+
+sub movedirection
+	callsub stop
+			
+	if left==1 then
+		while prox.horizontal[3]>0 do
+			callsub turnleft
+		end
+	end
+			
+	if right==1 then
+		while prox.horizontal[1]>0 do
+			callsub turnright
+		end
+	end
+					
+	if left==0 and right==0 then
+		callsub stop
+	end
+			
+	callsub stop
+ 	callsub moveforward
+
+onevent button.forward
+	if button.forward==1 then
+		callsub moveforward
+	end
+
+onevent button.center
+	if button.center==1 then
+		callsub stop
+	end
+	
+onevent button.left
+	if button.left==1 then
+		callsub turnleft
+	end
+	
+onevent button.right
+	if button.right==1 then
+		callsub turnright
+	end
+
+onevent prox
+	
+	if prox.horizontal[2]>2000 then
+		
+		if prox.horizontal[4]&lt;1 then
+			right=1
+		else
+			left=0
+		end
+	
+		if prox.horizontal[0]&lt;1 then
+			left=1
+		else
+			left=0
+		end
+		
+		while prox.horizontal[2]&lt;4500 do
+			callsub moveforward
+		end
+		
+		if prox.horizontal[2]>4500 then
+			callsub movedirection
+		end
+	end
+	
+	
+	
+	if prox.horizontal[4]>1900 and prox.horizontal[2]&lt; 1 then
+		exitcorrect = 0
+		while prox.horizontal[4]>1900 do
+			callsub correctleft
+			if prox.horizontal[2]>4500 then
+				callsub movedirection
+			end
+		end
+		callsub moveforward
+	end
+	
+	if prox.horizontal[0]>1900 and prox.horizontal[2]&lt; 1 then
+		exitcorrect = 0
+		while prox.horizontal[0]>1900 do
+			callsub correctright
+			if prox.horizontal[2]>4500 then
+				callsub movedirection
+			end
+		end
+		callsub moveforward
+	end
+	
+	if prox.ground.ambiant[0]&lt;1 or prox.ground.ambiant[1]&lt;1 then
+		callsub stop
+	end</node>
+
+
+</network>
