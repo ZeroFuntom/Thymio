@@ -16,8 +16,10 @@
 <node nodeId="32998" name="thymio-II">var left = 0
 var right = 0
 var exitcorrect = 0
+#call leds.top()
 
 sub moveforward
+	call leds.top(0,255,0)
 	motor.left.target = 200
 	motor.right.target = 200
 
@@ -34,15 +36,25 @@ sub turnright
 	motor.right.target = -200
 	
 sub correctleft
+	call leds.top(255,0,0)
 	motor.left.target = 150
 	motor.right.target = 200
 
 sub correctright
+	call leds.top(0,0,255)
 	motor.left.target = 200
 	motor.right.target = 150
 
 sub movedirection
 	callsub stop
+	
+	if left==0 and right==0 then
+		callsub stop
+	end
+	
+	if left==1 and right==1 then
+		callsub stop
+	end
 			
 	if left==1 then
 		while prox.horizontal[3]>0 do
@@ -56,12 +68,31 @@ sub movedirection
 		end
 	end
 					
-	if left==0 and right==0 then
-		callsub stop
-	end
+	
 			
 	callsub stop
  	callsub moveforward
+
+sub checkdirection
+	if prox.horizontal[4]&lt;1 then
+		right=1
+	else
+		left=0
+	end
+
+	if prox.horizontal[0]&lt;1 then
+		left=1
+	else
+		left=0
+	end
+	
+	while prox.horizontal[2]&lt;4500 do
+		callsub moveforward
+	end
+		
+	if prox.horizontal[2]>4500 then
+		callsub movedirection
+	end
 
 onevent button.forward
 	if button.forward==1 then
@@ -85,49 +116,33 @@ onevent button.right
 
 onevent prox
 	
-	if prox.horizontal[2]>2000 then
-		
-		if prox.horizontal[4]&lt;1 then
-			right=1
-		else
-			left=0
-		end
-	
-		if prox.horizontal[0]&lt;1 then
-			left=1
-		else
-			left=0
-		end
-		
-		while prox.horizontal[2]&lt;4500 do
-			callsub moveforward
-		end
-		
-		if prox.horizontal[2]>4500 then
-			callsub movedirection
-		end
+	if prox.horizontal[2]>4500 and prox.horizontal[0]>1 and prox.horizontal[4]>1 then
+		callsub stop
 	end
 	
-	
+	if prox.horizontal[2]>2000 then
+		callsub checkdirection
+	end
 	
 	if prox.horizontal[4]>1900 and prox.horizontal[2]&lt; 1 then
-		exitcorrect = 0
+		
 		while prox.horizontal[4]>1900 do
 			callsub correctleft
 			if prox.horizontal[2]>4500 then
-				callsub movedirection
+				callsub checkdirection
 			end
 		end
 		callsub moveforward
 	end
 	
 	if prox.horizontal[0]>1900 and prox.horizontal[2]&lt; 1 then
-		exitcorrect = 0
+		
 		while prox.horizontal[0]>1900 do
 			callsub correctright
 			if prox.horizontal[2]>4500 then
-				callsub movedirection
+				callsub checkdirection
 			end
+			
 		end
 		callsub moveforward
 	end
