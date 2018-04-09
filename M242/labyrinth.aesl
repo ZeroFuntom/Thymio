@@ -116,6 +116,10 @@ onevent button.right
 
 onevent prox
 	
+	if prox.ground.reflected[0]&lt;100 or prox.ground.reflected[1]&lt;100 then
+		callsub stop
+	end
+	
 	if prox.horizontal[2]>4500 and prox.horizontal[0]>1 and prox.horizontal[4]>1 then
 		callsub stop
 	end
@@ -128,7 +132,7 @@ onevent prox
 		
 		while prox.horizontal[4]>1900 do
 			callsub correctleft
-			if prox.horizontal[2]>4500 then
+			if prox.horizontal[2]>2000 then
 				callsub checkdirection
 			end
 		end
@@ -139,17 +143,14 @@ onevent prox
 		
 		while prox.horizontal[0]>1900 do
 			callsub correctright
-			if prox.horizontal[2]>4500 then
+			if prox.horizontal[2]>2000 then
 				callsub checkdirection
 			end
 			
 		end
 		callsub moveforward
 	end
-	
-	if prox.ground.ambiant[0]&lt;1 or prox.ground.ambiant[1]&lt;1 then
-		callsub stop
-	end</node>
+	</node>
 
 
 </network>
