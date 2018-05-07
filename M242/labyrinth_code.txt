@@ -1,0 +1,166 @@
+#Variablen (Boolean)
+var left = 0
+var right = 0
+
+#Thymio fährt vorwärts
+sub moveforward
+	call leds.top(0,255,0)
+	motor.left.target = 200
+	motor.right.target = 200
+
+#Thymio hält an
+sub stop
+	motor.left.target = 0
+	motor.right.target = 0
+
+#Thymio dreht nach links
+sub turnleft
+	motor.left.target = -200
+	motor.right.target = 200
+
+#Thymio dreht nach rechts
+sub turnright
+	motor.left.target = 200
+	motor.right.target = -200
+
+#Thymio korrigiert nach links
+sub correctleft
+	call leds.top(255,0,0)
+	motor.left.target = 150
+	motor.right.target = 200
+
+#Thymio korrigiert nach rechts
+sub correctright
+	call leds.top(0,0,255)
+	motor.left.target = 200
+	motor.right.target = 150
+
+#In die richtige Richtung drehen
+sub movedirection
+	#Aufruf zum Stoppen
+	callsub stop
+	
+	#Sieht nach ob links und rechts frei ist
+	if left==0 and right==0 then
+		callsub stop
+	end
+	
+	#Sieht nach ob links und rechts belegt ist
+	if left==1 and right==1 then
+		callsub stop
+	end
+	
+	#Sieht nach ob links frei ist	
+	if left==1 then
+		while prox.horizontal[3]>0 do
+			callsub turnleft
+		end
+	end
+	
+	#Sieht nach ob rechts frei ist			
+	if right==1 then
+		while prox.horizontal[1]>0 do
+			callsub turnright
+		end
+	end
+	
+	#Nach dem Drehen wieder geradeaus fahren							
+	callsub stop
+ 	callsub moveforward
+
+#Thymio sieht nach, welche Seite frei ist
+sub checkdirection
+	
+	#Sieht nach ob rechts frei ist	
+	if prox.horizontal[4]<1 then
+		right=1
+	else
+		left=0
+	end
+	
+	#Sieht nach ob links frei ist	
+	if prox.horizontal[0]<1 then
+		left=1
+	else
+		left=0
+	end
+	
+	#Solange Sensor unter 4500: fahre vorwärts
+	while prox.horizontal[2]<4500 do
+		callsub moveforward
+	end
+	
+	#Wenn Sensor über 4500: drehe in die analysierte Richtung	
+	if prox.horizontal[2]>4500 then
+		callsub movedirection
+	end
+
+#Vorwärts-Knopf gedrückt
+onevent button.forward
+	if button.forward==1 then
+		callsub moveforward
+	end
+
+#Stop-Knopf gedrückt
+onevent button.center
+	if button.center==1 then
+		callsub stop
+	end
+
+#Links-Knopf gedrückt	
+onevent button.left
+	if button.left==1 then
+		callsub turnleft
+	end
+
+#Rechts-Knopf gedrückt
+onevent button.right
+	if button.right==1 then
+		callsub turnright
+	end
+
+#Sensor aktiv
+onevent prox
+	
+	#Vor Abgrund stoppen
+	if prox.ground.reflected[0]<100 or prox.ground.reflected[1]<100 then
+		callsub stop
+	end
+	
+	
+	if prox.horizontal[2]>4500 and prox.horizontal[0]>1 and prox.horizontal[4]>1 then
+		callsub stop
+	end
+	
+	#Wenn Wand in Sicht dann auf freie Richtung prüfen
+	if prox.horizontal[2]>2000 then
+		callsub checkdirection
+	end
+	
+	#Wenn Wand rechts zu nahe dann Korrektur machen
+	if prox.horizontal[4]>1900 and prox.horizontal[2]< 1 then
+		
+		while prox.horizontal[4]>1900 do
+			callsub correctleft
+			#Wenn bei Korrektur Wand in Sicht dann auf freie Richtung prüfen
+			if prox.horizontal[2]>2000 then
+				callsub checkdirection
+			end
+		end
+		#Wenn fertig mit Korrektur dann geradeaus fahren
+		callsub moveforward
+	end
+	
+	#Wenn Wand links zu nahe dann Korrektur machen
+	if prox.horizontal[0]>1900 and prox.horizontal[2]< 1 then
+		
+		while prox.horizontal[0]>1900 do
+			callsub correctright
+			#Wenn bei Korrektur Wand in Sicht dann auf freie Richtung prüfen
+			if prox.horizontal[2]>2000 then
+				callsub checkdirection
+			end
+		end
+		#Wenn fertig mit Korrektur dann geradeaus fahren
+		callsub moveforward
+	end
